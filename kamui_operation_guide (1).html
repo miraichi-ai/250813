@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>神威/KAMUI 実際の操作ガイド - 完全版</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Mermaid.js の読み込み -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                fontFamily: '"Kaisei Decol", sans-serif',
+                themeVariables: {
+                    primaryColor: '#4CAF50',
+                    primaryTextColor: '#fff',
+                    primaryBorderColor: '#E91E63',
+                    lineColor: '#009688',
+                    secondaryColor: '#FFC107',
+                    tertiaryColor: '#9575CD'
+                },
+                flowchart: {
+                    cornerRadius: 15,
+                    curve: 'cardinal',
+                    htmlLabels: true
+                }
+            });
+        });
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Kaisei Decol', sans-serif;
+            line-height: 1.8;
+            background: linear-gradient(135deg, #FAFAFA 0%, #F5F5F5 100%);
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #009688 100%);
+            color: white;
+            padding: 40px 20px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            text-align: center;
+            opacity: 0.9;
+        }
+        
+        .section {
+            background: white;
+            margin-bottom: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border-left: 5px solid #4CAF50;
+        }
+        
+        .section-header {
+            background: linear-gradient(135deg, #4CAF50 0%, #009688 100%);
+            color: white;
+            padding: 20px 25px;
+            position: relative;
+        }
+        
+        .section-header::before {
+            content: "";
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #FFC107;
+        }
+        
+        .section-header h2 {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-left: 35px;
+        }
+        
+        .section-content {
+            padding: 25px;
+        }
+        
+        .game-example {
+            background: linear-gradient(135deg, rgba(233, 30, 99, 0.1) 0%, rgba(233, 30, 99, 0.05) 100%);
+            border: 2px solid #E91E63;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .screen-mockup {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            position: relative;
+        }
+        
+        .screen-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .interface-element {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .chat-input {
+            background: linear-gradient(135deg, rgba(33, 150, 243, 0.1) 0%, rgba(33, 150, 243, 0.05) 100%);
+            border-left: 4px solid #2196F3;
+        }
+        
+        .grimoire-library {
+            background: linear-gradient(135deg, rgba(255, 152, 0, 0.1) 0%, rgba(255, 152, 0, 0.05) 100%);
+            border-left: 4px solid #FF9800;
+        }
+        
+        .file-structure {
+            background: linear-gradient(135deg, rgba(156, 39, 176, 0.1) 0%, rgba(156, 39, 176, 0.05) 100%);
+            border-left: 4px solid #9C27B0;
+        }
+        
+        .yaml-plan {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%);
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .operation-status {
+            background: linear-gradient(135deg, rgba(0, 150, 136, 0.1) 0%, rgba(0, 150, 136, 0.05) 100%);
+            border-left: 4px solid #009688;
+        }
+        
+        .mermaid-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .progress-demo {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .progress-bar {
+            flex-grow: 1;
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 25px;
+            margin: 0 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8em;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-working {
+            background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
+            animation: pulse 2s infinite;
+        }
+        
+        .progress-complete {
+            background: linear-gradient(90deg, #4CAF50 0%, #388E3C 100%);
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .step-by-step {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .step-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #4CAF50;
+            position: relative;
+        }
+        
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: linear-gradient(135deg, #4CAF50 0%, #009688 100%);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .cost-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .cost-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .cost-low {
+            border-top: 4px solid #4CAF50;
+        }
+        
+        .cost-medium {
+            border-top: 4px solid #FFC107;
+        }
+        
+        .cost-high {
+            border-top: 4px solid #E91E63;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 152, 0, 0.1) 100%);
+            border: 2px solid #FFC107;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .tip-box {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(0, 150, 136, 0.1) 100%);
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .avatar-demo {
+            background: linear-gradient(135deg, rgba(149, 117, 205, 0.1) 0%, rgba(149, 117, 205, 0.05) 100%);
+            border: 2px solid #9575CD;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .term {
+            background: linear-gradient(135deg, #4CAF50 0%, #009688 100%);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-weight: 600;
+            margin-right: 5px;
+        }
+        
+        .explanation {
+            color: #666;
+            font-style: italic;
+            margin-left: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .screen-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .step-by-step {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ヘッダー -->
+        <div class="header">
+            <h1>🎮 神威/KAMUI 実際の操作ガイド - 完全版</h1>
+            <p>実戦での画面操作から制作事例まで、すべてを図解で解説</p>
+        </div>
+
+        <!-- ゲーム開発実例 -->
+        <div class="section">
+            <div class="section-header">
+                <h2>🚢 実際のゲーム開発事例：Unity海軍ゲーム</h2>
+            </div>
+            <div class="section-content">
+                <div class="game-example">
+                    <h4>⚡ 驚異的な開発速度の実現</h4>
+                    <p><span class="term">Unity</span><span class="explanation">（ゲーム開発エンジン）</span>上で海軍ゲームを制作した実際の事例です。従来手法では数週間かかる作業が、カムイにより大幅に短縮されました。</p>
+                </div>
+                
+                <div class="mermaid-container">
+                    <div class="mermaid">
+                        flowchart TD
+                            A[🎯 ゲーム企画<br/>海軍戦略ゲーム] --> B[🚢 船舶モデル生成<br/>4種類 → 8種類に拡張]
+                            
+                            B --> C[⚡ カムイによる生成<br/>3時間で完了]
+                            B --> D[🔄 従来手法<br/>数週間〜数ヶ月]
+                            
+                            C --> E[🌊 Unity上での配置<br/>海上に複製・配置]
+                            E --> F[⚔️ ゲームロジック実装<br/>軍隊・海軍システム]
+                            F --> G[🎮 プロトタイプ完成<br/>プレイ可能な状態]
+                            
+                            style A fill:#E91E63,color:#fff
+                            style C fill:#4CAF50,color:#fff
+                            style D fill:#FF5722,color:#fff
+                            style G fill:#FFC107,color:#000
+                    </div>
+                </div>
+                
+                <div class="step-by-step">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h4>🚢 船舶モデル生成</h4>
+                        <p><span class="term">4種類→8種類</span><span class="explanation">（戦艦、巡洋艦、駆逐艦、潜水艦等）</span>のバリエーション豊富な船舶を短時間で生成</p>
+                    </div>
+                    
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h4>⏱️ 時間効率</h4>
+                        <p><strong>カムイ：3時間</strong><br>
+                        従来手法：数週間<br>
+                        <span style="color: #4CAF50; font-weight: bold;">約50-100倍の効率化</span></p>
+                    </div>
+                    
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <h4>🔄 Unity統合</h4>
+                        <p>生成したアセットを<span class="term">Unity</span><span class="explanation">（ゲーム開発環境）</span>に直接インポートし、海上配置とゲームロジック実装</p>
+                    </div>
+                    
+                    <div class="step-card">
+                        <div class="step-number">4</div>
+                        <h4>🎯 プロトタイプ完成</h4>
+                        <p>実際にプレイ可能な海軍戦略ゲームのプロトタイプを短期間で完成</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 登録・アクセス方法 -->
+        <div class="section">
+            <div class="section-header">
+                <h2>🔐 登録からアクセスまでの流れ</h2>
+            </div>
+            <div class="section-content">
+                <div class="warning-box">
+                    <h4>⚠️ 重要：即時利用はできません</h4>
+                    <p>カムイは登録後すぐには使用できません。<span class="term">開発元による確認・承認</span><span class="explanation">（運営チームによる手動審査）</span>が必要で、通常数日から1週間程度かかります。</p>
+                </div>
+                
+                <div class="mermaid-container">
+                    <div class="mermaid">
+                        flowchart LR
+                            A[🌐 公式URL<br/>アクセス] --> B[📝 ユーザー登録<br/>情報入力]
+                            B --> C[📨 申請送信<br/>自動受付]
+                            C --> D[⏳ 開発元確認<br/>数日〜1週間]
+                            D --> E[✅ 承認通知<br/>メール受信]
+                            E --> F[🚀 カムイ利用開始<br/>ログイン可能]
+                            
+                            style A fill:#2196F3,color:#fff
+                            style D fill:#FF9800,color:#fff
+                            style F fill:#4CAF50,color:#fff
+                    </div>
+                </div>
+                
+                <div class="tip-box">
+                    <h4>💡 承認待ちの間にできること</h4>
+                    <ul>
+                        <li>公式サイトでの<span class="term">事例研究</span><span class="explanation">（他のユーザーの制作例を見る）</span></li>
+                        <li>チュートリアル動画の視聴</li>
+                        <li>グリモワール図書館の内容確認</li>
+                        <li>制作したいプロジェクトの企画立案</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 画面構成の詳細解説 -->
+        <div class="section">
+            <div class="section-header">
+                <h2>🖥️ 画面構成と操作の実際</h2>
+            </div>
+            <div class="section-content">
+                <div class="screen-layout">
+                    <div class="screen-mockup">
+                        <h4 style="text-align: center; color: #4CAF50; margin-bottom: 15px;">🏠 初期画面</h4>
+                        <div class="interface-element chat-input">
+                            <strong>💬 中央チャット入力欄</strong><br>
+                            <small>「GPTのチャット欄のような入力エリア」<br>
+                            ここで最初の要求を入力</small>
+                        </div>
+                        <div class="interface-element">
+                            <strong>⬇️ 矢印ボタン</strong><br>
+                            <small>メイン画面への移行ボタン</small>
+                        </div>
+                        <div class="interface-element">
+                            <strong>📊 レポートボタン</strong><br>
+                            <small>直接メイン画面にアクセス</small>
+                        </div>
+                    </div>
+                    
+                    <div class="screen-mockup">
+                        <h4 style="text-align: center; color: #4CAF50; margin-bottom: 15px;">⚙️ メイン画面</h4>
+                        <div class="interface-element chat-input">
+                            <strong>💬 左下：チャット履歴</strong><br>
+                            <small>プロジェクトマネージャーとの対話ログ<br>
+                            「ChatGPTの入力欄が左下に移動」</small>
+                        </div>
+                        <div class="interface-element grimoire-library">
+                            <strong>📚 グリモワール図書館</strong><br>
+                            <small>テンプレートの「貸し出し」システム<br>
+                            RAGの仕組みで参考資料を提供</small>
+                        </div>
+                        <div class="interface-element file-structure">
+                            <strong>📁 ファイル構成表示</strong><br>
+                            <small>プロジェクトの階層構造</small>
+                        </div>
+                        <div class="interface-element yaml-plan">
+                            <strong>📝 YAML計画書</strong><br>
+                            <small>右側：詳細な作業計画書<br>
+                            プロマネが自動作成</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tip-box">
+                    <h4>🎯 実際の使い方のコツ</h4>
+                    <p>「よく皆さんがやられるのは」プラスボタン（ホームボタンの上）から新しいプロジェクトを開始することです。プロンプト入力→一括生成のシンプルな流れで効率的に作業できます。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI処理状況の可視化 -->
+        <div class="section">
+            <div class="section-header">
+                <h2>⚡ オペレーション表示：AI処理状況の監視</h2>
+            </div>
+            <div class="section-content">
+                <p><span class="term">オペレーション表示</span><span class="explanation">（AI作業状況の可視化機能）</span>により、複数のAIエージェントの作業進行をリアルタイムで確認できます。</p>
+                
+                <div class="operation-status">
+                    <h4>🔵 青色バー：作業中（現在処理実行中）</h4>
+                    <div class="progress-demo">
+                        <span>画像生成AI:</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill progress-working" style="width: 65%;">
+                                処理中... 65%
+                            </div>
+                        </div>
+                        <span style="color: #2196F3;">🔄 実行中</span>
+                    </div>
+                    
+                    <h4>🟢 緑色バー：完了（処理成功）</h4>
+                    <div class="progress-demo">
+                        <span>テキスト生成:</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill progress-complete" style="width: 100%;">
+                                完了 100%
+                            </div>
+                        </div>
+                        <span style="color: #4CAF50;">✅ 完了</span>
+                    </div>
+                </div>
+                
+                <div class="step-by-step">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h4>👀 リアルタイム監視</h4>
+                        <p>複数のAIが並列作業する様子を色分けされたバーで直感的に把握</p>
+                    </div>
+                    
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h4>⏸️ 中断機能</h4>
+                        <p>処理時間が長い場合や方向性を変更したい場合、任意のタイミングで中断可能</p>
+                    </div>
+                    
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <h4>💾 必須の保存作業</h4>
+                        <p><strong>「必ず生成されたら保存」</strong><br>
+                        うまくいかなくても一度保存することが重要</p>
+                    </div>
+                    
+                    <div class="step-card">
+                        <div class="step-number">4</div>
+                        <h4>⚠️ データベース非保存</h4>
+                        <p>完成物は<span class="term">データベースに格納されない</span><span class="explanation">（自動保存なし）</span>ため、PC上への手動保存が原則</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- コスト（MP）管理 -->
+        <div class="section">
+            <div class="section-header">
+                <h2>💰 MP消費量とコスト管理</h2>
+            </div>
+            <div class="section-content">
+                <p><span class="term">MP</span><span class="explanation">（Magic Point = 計算リソース使用量）</span>はRPGゲームの魔法使用量のような概念で、各AIの処理にかかるコストを表します。</p>
+                
+                <div class="cost-comparison">
+                    <div class="cost-item cost-low">
+                        <h4>⚡ 低消費</h4>
+                        <p><strong>テキスト生成</strong></p>
+                        <small>文章作成、計画書生成<br>
+                        「電気を当てるだけ」程度</small>
+                    </div>
+                    
+                    <div class="cost-item cost-low">
+                        <h4>🖼️ やや低消費</h4>
+                        <p><strong>画像生成</strong></p>
+                        <small>イラスト、写真、アイコン<br>
+                        「そこそこ低い」消費量</small>
+                    </div>
+                    
+                    <div class="cost-item cost-medium">
+                        <h4>🔊 中消費</h4>
+                        <p><strong>音声生成</strong></p>
+                        <small>BGM、ナレーション<br>
+                        中程度のMP消費</small>
+                    </div>
+                    
+                    <div class="cost-item cost-high">
+                        <h4>🎬 高消費</h4>
+                        <p><strong>動画生成</strong></p>
+                        <small>アニメーション、映像<br>
+                        最も高いMP消費</small>
+                    </div>
+                </div>
+                
+                <div class="tip-box">
+                    <h4>💡 効率的なMP管理のコツ</h4>
+                    <ul>
+                        <li><strong>テキストから開始：</strong>まず低コストでアイデアを固める</li>
+                        <li><strong>段階的な制作：</strong>画像→音声→動画の順で徐々に高度化</li>
+                        <li><strong>プレビュー活用：</strong>本格生成前に小規模テストを実施</li>
+                        <li><strong>社長の気分：</strong>「管理画面で社長になったつもりで」リソース配分を考える</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- グリモワール図書館の実践活用 -->
+        <div class="section">
+            <div class="section-header">
+                <h2>📚 グリモワール図書館の検索と活用</h2>
+            </div>
+            <div class="section-content">
+                <div class="mermaid-container">
+                    <div class="mermaid">
+                        flowchart TD
+                            A[📚 グリモワール図書館<br/>アクセス] --> B[🔍 検索ボタン<br/>クリック]
+                            
+                            B --> C{選択肢}
+                            C -->|確認してから| D[👁️ 確認ボタン<br/>計画書プレビュー]
+                            C -->|すぐに使用| E[📥 挿入ボタン<br/>直接計画書挿入]
+                            
+                            D --> F[📝 計画書確認<br/>内容チェック]
+                            F --> G[✅ 問題なければ<br/>挿入実行]
+                            
+                            E --> H[📋 即座に計画書反映]
+                            G --> H
+                            
+                            H --> I[⚡ 一括生成<br/>実行準備完了]
+                            
+                            style A fill:#FF9800,color:#fff
+                            style B fill:#2196F3,color:#fff
+                            style I fill:#4CAF50,color:#fff
+                    </div>
+                </div>
+                
+                <div class="tip-box">
+                    <h4>📖 効果的な図書館活用法</h4>
+                    <p>「借りてくるのが早い」というアプローチで、既存の優秀なテンプレートを活用することから始めましょう。</p>
+                    
+                    <div style="margin-top: 15px;">
+                        <h5>🎯 推奨活用順序：</h5>
+                        <ol>
+                            <li><strong>検索→確認：</strong>初心者は内容を事前確認してから使用</li>
+                            <li><strong>直接挿入：</strong>慣れてきたら信頼できるテンプレートを即座に活用</li>
+                            <li><strong>カスタマイズ：</strong>基本テンプレートを自分好みに調整</li>
+                            <li><strong>独自作成：</strong>完全オリジナルのグリモワール制作</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- アバター動画生成の実例 -->
+        <div class="section">
+            <div class="section-header">
+                <h2>🎭 日本語アバター動画生成の実際</h2>
+            </div>
+            <div class="section-content">
+                <div class="avatar-demo">
+                    <h4>🎬 新機能：日本語を話すアバター作成</h4>
+                    <p>「皆さんこんにちは。今回新しく日本語を話すアバターを作ることができる新しいグリモワールをリリースしました。皆さんが気に入ってくれると信じています。」</p>
+                </div>
+                
+                <div class="mermaid-container">
+                    <div class="mermaid">
+                        sequenceDiagram
+                            participant U as 👤 ユーザー
+                            participant PM as 📋 プロマネ
+                            participant TG as 📝 テキスト生成
+                            participant IG as 🖼️ 画像生成  
+                            participant VG as 🎬 動画生成
+                            participant AG as 🔊 音声生成
+                            
+                            U->>PM: 祖父と孫が仲良く座っている<br/>アニメ調の動画を作って
+                            PM->>PM: YAML計画書作成
+                            
+                            par 並列処理
+                                PM->>TG: 感動的なセリフ生成
+                                PM->>IG: アニメ調画像生成
+                                PM->>VG: 動画化処理
+                                PM->>AG: 音声合成・BGM
+                            end
+                            
+                            TG-->>PM: テキストコンテンツ ✅
+                            IG-->>PM: 画像素材 ✅  
+                            AG-->>PM: 音声ファイル ✅
+                            VG-->>PM: 動画完成 ✅
+                            
+                            PM->>U: 統合された感動的な動画 🎬
+                    </div>
+                </div>
+                
+                <div class="step-by-step">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h4>📝 デフォルト設定</h4>
+                        <p><span class="term">プリセット</span><span class="explanation">（あらかじめ設定された内容）</span>で基本的なセリフが計画書に組み込まれる</p>
+                    </div>
+                    
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h4>✏️ カスタマイズ</h4>
+                        <p>「別なことをしゃべらせたい時」は計画書から直接修正、または左下チャットから追加指示</p>
+                    </div>
+                    
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <h4>🔧 技術詳細</h4>
+                        <p><strong>コンテンツ：</strong>MP3（音声）+ MP4（動画）<br>
+                        <strong>依存関係：</strong>音声→動画の順序で処理</p>
+                    </div>
+                    
+                    <div class="step-card">
+                        <div class="step-number">4</div>
+                        <h4>⚙️ 上級者向け</h4>
+                        <p><span class="term">プロンプト調整</span><span class="explanation">（AI指示の細かい調整）</span>により、より精密な制御が可能</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ガントチャート機能の実際 -->
+        <div class="section">
+            <div class="section-header">
+                <h2>📊 ガントチャート機能の実戦活用</h2>
+            </div>
+            <div class="section-content">
+                <div class="tip-box">
+                    <h4>⚡ 特徴：生成ボタン不要</h4>
+                    <p><span class="term">ガントチャート</span><span class="explanation">（プロジェクト進行管理表）</span>は一括生成ボタンを押さずに即座に表示され、左側メニューからいつでもアクセス可能です。</p>
+                </div>
+                
+                <div class="mermaid-container">
+                    <div class="mermaid">
+                        flowchart LR
+                            A[💬 ガントチャート<br/>作成要求] --> B[🔍 例を検索<br/>テンプレート探索]
+                            B --> C[📊 即座に表示<br/>生成ボタン不要]
+                            C --> D[📱 左側メニュー<br/>常時アクセス可能]
+                            D --> E[👁️ 進捗確認<br/>視覚的管理]
+                            E --> F[🔄 リアルタイム<br/>更新・調整]
+                            
+                            style A fill:#E91E63,color:#fff
+                            style C fill:#4CAF50,color:#fff
+                            style F fill:#009688,color:#fff
+                    </div>
+                </div>
+                
+                <div class="screen-mockup">
+                    <h4 style="color: #4CAF50; margin-bottom: 15px;">📊 ガントチャート表示例</h4>
+                    <div class="interface-element">
+                        <strong>📅 タイムライン表示</strong><br>
+                        <small>横軸：時間軸、縦軸：タスク一覧</small>
+                    </div>
+                    <div class="interface-element operation-status">
+                        <strong>🎯 進捗バー</strong><br>
+                        <small>各タスクの完了率を色分けで表示</small>
+                    </div>
+                    <div class="interface-element">
+                        <strong>🔗 依存関係</strong><br>
+                        <small>タスク間の前後関係を線で可視化</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 学習方法と実践的アドバイス -->
+        <div class="section">
+            <div class="section-header">
+                <h2>🎓 効果的な学習方法と実践アドバイス</h2>
+            </div>
+            <div class="section-content">
+                <div class="step-by-step">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h4>📖 チュートリアルから開始</h4>
+                        <p><strong>「絵本を作ってみよう」</strong>などの基本チュートリアルから始めることを強く推奨</p>
+                    </div>
+                    
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h4>🔄 反復改善の習慣化</h4>
+                        <p>「やりたいことを適当に出して→一括生成→ダメだったら再チャット→部分修正」のサイクルを身につける</p>
+                    </div>
+                    
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <h4>📚 グリモワール活用</h4>
+                        <p>慣れてきたら自分なりのグリモワールを作成し、「より良いものに」改良していく</p>
+                    </div>
+                    
+                    <div class="step-card">
+                        <div class="step-number">4</div>
+                        <h4>🌐 コミュニティ参加</h4>
+                        <p><span class="term">X（Twitter）</span><span class="explanation">（SNSプラットフォーム）</span>で「ゴリゴリ投稿」している上級ユーザーを参考にする</p>
+                    </div>
+                </div>
+                
+                <div class="warning-box">
+                    <h4>💾 保存に関する最重要ポイント</h4>
+                    <ul>
+                        <li><strong>完成したら即座に保存：</strong>「必ず生成されたら保存」</li>
+                        <li><strong>失敗作も保存：</strong>「うまくいかなくても一度保存」</li>
+                        <li><strong>ローカル保存原則：</strong>データベースに保存されないため、PC上への手動保存が必須</li>
+                        <li><strong>複数ファイル対応：</strong>画像・動画・音声すべてに適用</li>
+                    </ul>
+                </div>
+                
+                <div class="tip-box">
+                    <h4>🚀 カムイマスターへの道</h4>
+                    <p>最初は「何ができるかわからない」状態から始まりますが、使っているうちに「こうしたい、ああしたい」という具体的な要求が自然に生まれてきます。この段階になれば、カムイの真の力を引き出せるようになります。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- まとめ -->
+        <div class="section">
+            <div class="section-header">
+                <h2>🎯 神威/KAMUI 実践マスターガイド総括</h2>
+            </div>
+            <div class="section-content">
+                <div class="tip-box">
+                    <h4>🌟 カムイで実現する創造の革命</h4>
+                    <p style="font-size: 1.1em; line-height: 1.9; margin-bottom: 20px;">
+                        神威/KAMUIは単なるツールではなく、<strong>「創造的思考を技術力に変換するプラットフォーム」</strong>です。従来は専門知識が必要だった高度なコンテンツ制作が、自然言語での対話により誰でも実現可能になりました。
+                    </p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 20px;">
+                        <div style="background: rgba(76, 175, 80, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #4CAF50;">
+                            <h5>⚡ 効率性</h5>
+                            <p>ゲーム開発で実証された<strong>50-100倍の効率化</strong></p>
+                        </div>
+                        
+                        <div style="background: rgba(0, 150, 136, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #009688;">
+                            <h5>🎨 創造性</h5>
+                            <p>マルチモーダル統合による<strong>表現力の飛躍的向上</strong></p>
+                        </div>
+                        
+                        <div style="background: rgba(149, 117, 205, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #9575CD;">
+                            <h5>🤝 協働性</h5>
+                            <p>グリモワール図書館による<strong>知識の集合化</strong></p>
+                        </div>
+                        
+                        <div style="background: rgba(255, 193, 7, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #FFC107;">
+                            <h5>🚀 成長性</h5>
+                            <p>継続的なアップデートによる<strong>無限の可能性</strong></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <p style="text-align: center; font-size: 1.3em; margin-top: 30px; color: #4CAF50; font-weight: 600;">
+                    🎮 ゲームから動画、音楽、アートまで—<br>
+                    あなたのアイデアに技術的限界はもうありません 🌟
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

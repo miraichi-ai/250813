@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カムイ GUI vs CLI + MCP システム完全図解</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Mermaid.js の読み込み -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                securityLevel: 'loose',
+                fontFamily: '"Kaisei Decol", sans-serif',
+                themeVariables: {
+                    primaryColor: '#4CAF50',
+                    primaryTextColor: '#fff',
+                    primaryBorderColor: '#E91E63',
+                    lineColor: '#009688',
+                    secondaryColor: '#FFC107',
+                    tertiaryColor: '#9575CD'
+                },
+                flowchart: {
+                    cornerRadius: 15,
+                    curve: 'cardinal',
+                    htmlLabels: true
+                }
+            });
+        });
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Kaisei Decol', sans-serif;
+            line-height: 1.8;
+            background: linear-gradient(135deg, #FAFAFA 0%, #F5F5F5 100%);
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #009688 100%);
+            color: white;
+            padding: 40px 20px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            text-align: center;
+            opacity: 0.9;
+        }
+        
+        .section {
+            background: white;
+            margin-bottom: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border-left: 5px solid #4CAF50;
+        }
+        
+        .section-header {
+            background: linear-gradient(135deg, #4CAF50 0%, #009688 100%);
+            color: white;
+            padding: 20px 25px;
+            position: relative;
+        }
+        
+        .section-header::before {
+            content: "";
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #FFC107;
+        }
+        
+        .section-header h2 {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-left: 35px;
+        }
+        
+        .section-content {
+            padding: 25px;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 20px 0;
+        }
+        
+        .interface-card {
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .gui-card {
+            background: linear-gradient(135deg, rgba(33, 150, 243, 0.1) 0%, rgba(3, 169, 244, 0.1) 100%);
+            border: 2px solid #2196F3;
+        }
+        
+        .cli-card {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(56, 142, 60, 0.1) 100%);
+            border: 2px solid #4CAF50;
+        }
+        
+        .interface-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #2196F3, #4CAF50);
+        }
+        
+        .gui-card::before {
+            background: #2196F3;
+        }
+        
+        .cli-card::before {
+            background: #4CAF50;
+        }
+        
+        .interface-title {
+            font-size: 1.4em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .gui-title {
+            color: #2196F3;
+        }
+        
+        .cli-title {
+            color: #4CAF50;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            background: white;
+            margin: 8px 0;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border-left: 4px solid;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .gui-card .feature-list li {
+            border-left-color: #2196F3;
+        }
+        
+        .cli-card .feature-list li {
+            border-left-color: #4CAF50;
+        }
+        
+        .mermaid-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .terminal-mockup {
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 20px;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .terminal-header {
+            background: #333;
+            margin: -20px -20px 15px -20px;
+            padding: 10px 20px;
+            border-radius: 10px 10px 0 0;
+            color: #ccc;
+            font-size: 0.9em;
+        }
+        
+        .terminal-line {
+            margin: 5px 0;
+        }
+        
+        .prompt {
+            color: #00ff00;
+        }
+        
+        .command {
+            color: #ffff00;
+        }
+        
+        .output {
+            color: #00ffff;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 152, 0, 0.1) 0%, rgba(255, 87, 34, 0.1) 100%);
+            border: 2px solid #FF9800;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .architecture-diagram {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            border: 2px solid #e9ecef;
+        }
+        
+        .layer {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid;
+        }
+        
+        .user-layer {
+            border-left-color: #E91E63;
+        }
+        
+        .interface-layer {
+            border-left-color: #2196F3;
+        }
+        
+        .core-layer {
+            border-left-color: #4CAF50;
+        }
+        
+        .api-layer {
+            border-left-color: #FF9800;
+        }
+        
+        .tool-layer {
+            border-left-color: #9C27B0;
+        }
+        
+        .workflow-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .workflow-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #4CAF50;
+            position: relative;
+        }
+        
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: linear-gradient(135deg, #4CAF50 0%, #009688 100%);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .term {
+            background: linear-gradient(135deg, #4CAF50 0%, #009688 100%);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-weight: 600;
+            margin-right: 5px;
+        }
+        
+        .explanation {
+            color: #666;
+            font-style: italic;
+            margin-left: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .workflow-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ヘッダー -->
+        <div class="header">
+            <h1>⚡ カムイ GUI vs CLI + MCP システム</h1>
+            <p>ウェブアプリケーションとコマンドライン、それぞれの特徴と活用法</p>
+        </div>
+
+        <!-- GUI vs CLI 基本比較 -->
+        <div class="section">
+            <div class="section-header">
+                <h2>🖱️ GUI（ウェブ版）vs ⌨️ CLI（コマンドライン版）</h2>
+            </div>
+            <div class="section-content">
+                <div class="comparison-grid">
+                    <div class="interface-card gui-card">
+                        <h3 class="interface-title gui-title">🌐 GUI（Graphical User Interface）</h3>
+                        <p style="text-align: center; margin-bottom: 20px; color: #666;">
+                            <span class="term">ウェブアプリケーション</span><span class="explanation">（ブラウザで操作する画面）</span>
+                        </p>
+                        <ul class="feature-list">
+                            <li>🖱️ <strong>マウス操作：</strong>クリック・ドラッグで直感的操作</li>
+                            <li>👀 <strong>視覚的操作：</strong>ボタンやメニューが見える</li>
+                            <li>🎨 <strong>対象ツール：</strong>Canva、カムイウェブ版</li>
+                            <li>👥 <strong>利用者：</strong>一般ユーザー・初心者向け</li>
+                            <li>⚡ <strong>特徴：</strong>すぐに使える、学習コストが低い</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="interface-card cli-card">
+                        <h3 class="interface-title cli-title">⌨️ CLI（Command Line Interface）</h3>
+                        <p style="text-align: center; margin-bottom: 20px; color: #666;">
+                            <span class="term">ターミナル</span><span class="explanation">（黒い画面でコマンド入力）</span>
+                        </p>
+                        <ul class="feature-list">
+                            <li>⌨️ <strong>キーボード操作：</strong>コマンド入力で精密制御</li>
+                            <li>📝 <strong>テキスト操作：</strong>コマンドで機能を呼び出し</li>
+                            <li>🛠️ <strong>対象ツール：</strong>VSCode、Cursor、ターミナル</li>
+                            <li>👨‍💻 <strong>利用者：</strong>エンジニア・上級者向け</li>
+                            <li>🎯 <strong>特徴：</strong>高機能、自動化可能、小回りが利く</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- カムイの現在構成 -->
+        <div class="section">
+            <div class="section-header">
+                <h2>🔄 カムイの現在の構成とAPI状況</h2>
+            </div>
+            <div class="section-content">
+                <div class="mermaid-container">
+                    <div class="mermaid">
+                        flowchart TD
+                            A[🌟 カムイプロジェクト] --> B[🌐 カムイ本体<br/>GUI版]
+                            A --> C[⌨️ カムイコード<br/>CLI版]
+                            
+                            B --> D[❌ 新API配信停止中<br/>アクセス制限]
+                            B --> E[🌍 ウェブアプリケーション<br/>ブラウザから操作]
+                            
+                            C --> F[🚀 アルファリリース中<br/>今月中に実装整備]
+                            C --> G[⚡ Claude Code<br/>+ MCP統合]
+                            
+                            D --> H[⚠️ アクセス過多で<br/>赤字リスク]
+                            F --> I[📖 ドキュメント整備中<br/>学習コスト高]
+                            
+                            style A fill:#4CAF50,color:#fff
+                            style B fill:#2196F3,color:#fff
+                            style C fill:#009688,color:#fff
+                            style D fill:#F44336,color:#fff
+                            style H fill:#FF9800,color:#000
+                    </div>
+                </div>
+                
+                <div class="warning-box">
+                    <h4>⚠️ 現在の利用状況について</h4>
+                    <p><strong>カムイ本体（GUI版）：</strong>アクセス過多により赤字リスクがあるため、新しいAPI配信を一時停止中。利用は可能だが制限あり。</p>
+                    <p><strong>カムイコード（CLI版）：</strong>アルファリリース段階で、今月中に実装を整える予定。ドキュメントが少なく上級者向け。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- MCP システムの詳細解説 -->
+        <div class="section">
+            <div class="section-header">
+                <h2>🔗 MCP（Model Context Protocol）システムの仕組み</h2>
+            </div>
+            <div class="section-content">
+                <p><span class="term">MCP</span><span class="explanation">（モデル・コンテキスト・プロトコル）</span>は、Claude Codeとターミナルをつなぎ、様々な外部ツールを呼び出すためのシステムです。</p>
+                
+                <div class="mermaid-container">
+                    <div class="mermaid">
+                        flowchart LR
+                            A[👨‍💻 ユーザー] --> B[⌨️ ターミナル<br/>Claude Code]
+                            B --> C[🔗 MCP設定ファイル<br/>ツール連携設定]
+                            
+                            C --> D[🤖 Claude AI]
+                            D --> E[🔧 各種ツール呼び出し]
+                            
+                            E --> F[📝 Notion連携]
+                            E --> G[🎨 画像生成API]
+                            E --> H[🎬 動画生成API]
+                            E --> I[🎵 音楽生成API]
+                            E --> J[🛠️ FFMPEG<br/>音声・動画処理]
+                            
+                            F --> K[📄 ドキュメント自動作成]
+                            G --> L[🖼️ 画像ファイル生成]
+                            H --> M[🎥 動画ファイル生成]
+                            I --> N[🎼 音楽ファイル生成]
+                            J --> O[⚙️ メディア最適化処理]
+                            
+                            style A fill:#E91E63,color:#fff
+                            style C fill:#4CAF50,color:#fff
+                            style D fill:#9C27B0,color:#fff
+                            style E fill:#FF9800,color:#fff
+                    </div>
+                </div>
+                
+                <div class="architecture-diagram">
+                    <h4>🏗️ MCP アーキテクチャの階層構造</h4>
+                    
+                    <div class="layer user-layer">
+                        <strong>👤 ユーザー層：</strong>ターミナルでコマンド入力・指示を出す
+                    </div>
+                    
+                    <div class="layer interface-layer">
+                        <strong>🔗 MCP インターフェース層：</strong>Claude Codeがコマンドを解釈し、適切なツールを選択
+                    </div>
+                    
+                    <div class="layer core-layer">
+                        <strong>🤖 AI処理層：</strong>Claude AIが複雑な指示を理解し、実行計画を立案
+                    </div>
+                    
+                    <div class="layer api-layer">
+                        <strong>🔧 API連携層：</strong>外部サービス（Notion、各種生成AI）との通信
+                    </div>
+                    
+                    <div class="layer tool-layer">
+                        <strong>⚙️ ツール実行層：</strong>FFMPEG等のローカルツールによる実際の処理
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Claude Code の実際の動作例 -->
+        <div class="section">
+            <div class="section-header">
+                <h2>💻 Claude Code + MCP の実際の動作例</h2>
+            </div>
+            <div class="section-content">
+                <div class="terminal-mockup">
+                    <div class="terminal-header">
+                        🖥️ ターミナル - Claude Code セッション
+                    </div>
+                    <div class="terminal-line">
+                        <span class="prompt">user@terminal:~$</span> 
+                        <span class="command">claude-code "涼しくなりそうな雪の世界の画像を作ってください"</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="output">🔄 Claude Code: MCP設定を読み込み中...</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="output">📋 計画を立てています:</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="output">  ✅ 1. 雪景色の画像を生成</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="output">  ✅ 2. 画像を最適化</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="output">  ✅ 3. ローカルに保存</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="output">🎨 画像生成API呼び出し中...</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="output">✅ 画像生成完了: snow_landscape_2025.png</span>
+                    </div>
+                </div>
+                
+                <div class="workflow-grid">
+                    <div class="workflow-card">
+                        <div class="step-number">1</div>
+                        <h4>📋 自動計画立案</h4>
+                        <p>Claude Codeが指示を解析し、必要な作業をチェックリスト形式で自動生成。一つずつ順番に実行していく。</p>
+                    </div>
+                    
+                    <div class="workflow-card">
+                        <div class="step-number">2</div>
+                        <h4>🔧 ツール自動選択</h4>
+                        <p>MCP設定に基づいて最適なAPI・ツールを自動選択。画像生成、動画編集、音声処理など適材適所で使い分け。</p>
+                    </div>
+                    
+                    <div class="workflow-card">
+                        <div class="step-number">3</div>
+                        <h4>⚙️ 高度な後処理</h4>
+                        <p><span class="term">FFMPEG</span><span class="explanation">（音声・動画処理ライブラリ）</span>等を使って、フェードアウト・画質調整など細かい処理が可能。</p>
+                    </div>
+                    
+                    <div class="workflow-card">
+                        <div class="step-number">4</div>
+                        <h4>🔄 バッチ処理対応</h4>
+                        <p>同じ作業の繰り返し（バナー大量生成等）を<span class="term">GitHub Actions</span><span class="explanation">（自動実行システム）</span>と組み合わせて完全自動化可能。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 実用例：Gemini + MCP での動画制作 -->
+        <div class="section">
+            <div class="section-header">
+                <h2>🎬 実用例：Gemini + MCP での動画制作ワークフロー</h2>
+            </div>
+            <div class="section-content">
+                <p>Googleクラウド上で<span class="term">Gemini</span><span class="explanation">（GoogleのAI）</span> + <span class="term">MCP</span><span class="explanation">（ツール連携システム）</span>を使った実際の動画制作プロセス：</p>
+                
+                <div class="mermaid-container">
+                    <div class="mermaid">
+                        sequenceDiagram
+                            participant U as 👨‍💻 ユーザー
+                            participant T as ⌨️ ターミナル
+                            participant G as 🤖 Gemini AI
+                            participant M as 🔗 MCP
+                            participant API as 🎨 生成API群
+                            participant F as ⚙️ FFMPEG
+                            
+                            U->>T: 雪世界の動画を作って
+                            T->>G: コマンド解析
+                            G->>M: ツール選択要求
+                            
+                            M->>API: 画像生成指示
+                            API-->>M: 雪景色画像完成
+                            
+                            M->>API: 動画変換指示
+                            API-->>M: 基本動画完成
+                            
+                            M->>API: BGM生成指示
+                            API-->>M: 音楽ファイル完成
+                            
+                            M->>F: 音声フェードアウト処理
+                            F-->>M: 最適化音楽完成
+                            
+                            M->>F: 動画・音楽統合
+                            F-->>M: 最終動画完成
+                            
+                            M-->>U: 完成動画を出力
+                    </div>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(0, 150, 136, 0.1) 100%); border: 2px solid #4CAF50; border-radius: 10px; padding: 20px; margin: 20px 0;">
+                    <h4>🎯 CLI版（カムイコード）の圧倒的なメリット</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 15px;">
+                        <div>
+                            <h5>⚡ 完全自動化</h5>
+                            <p>一度設定すれば、コマンド一つで複雑な動画制作が完了。手動操作が不要。</p>
+                        </div>
+                        <div>
+                            <h5>🎨 細かい制御</h5>
+                            <p>FFMPEGによる音声フェードアウト、画質調整、エフェクト等、GUI版では難しい細かい設定が可能。</p>
+                        </div>
+                        <div>
+                            <h5>🔄 バッチ処理</h5>
+                            <p>「文字変更→画像生成→動画作成」の繰り返し作業を完全自動化。大量制作に最適。</p>
+                        </div>
+                        <div>
+                            <h5>📈 スケーラビリティ</h5>
+                            <p>GitHub Actionsと連携して、クラウド上で大規模な自動生成システムを構築可能。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 使い分けガイド -->
+        <div class="section">
+            <div class="section-header">
+                <h2>⚖️ GUI vs CLI の適切な使い分けガイド</h2>
+            </div>
+            <div class="section-content">
+                <div class="comparison-grid">
+                    <div class="interface-card gui-card">
+                        <h3 class="interface-title gui-title">🌐 GUI版を選ぶべき場面</h3>
+                        <ul class="feature-list">
+                            <li>🚀 <strong>即座に始めたい：</strong>学習コストを抑えて今すぐ作品制作</li>
+                            <li>👥 <strong>初心者・一般ユーザー：</strong>プログラミング知識不要</li>
+                            <li>🎨 <strong>単発のクリエイティブ：</strong>一回限りの作品制作</li>
+                            <li>👀 <strong>視覚的確認重視：</strong>リアルタイムプレビューが必要</li>
+                            <li>🖱️ <strong>直感的操作優先：</strong>マウス操作で感覚的に制作</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="interface-card cli-card">
+                        <h3 class="interface-title cli-title">⌨️ CLI版を選ぶべき場面</h3>
+                        <ul class="feature-list">
+                            <li>🔄 <strong>大量・反復作業：</strong>同じ作業を何度も繰り返す</li>
+                            <li>👨‍💻 <strong>エンジニア・上級者：</strong>プログラミング経験がある</li>
+                            <li>⚙️ <strong>細かい制御が必要：</strong>音声フェードアウト等の精密調整</li>
+                            <li>🚀 <strong>自動化・効率化：</strong>GitHub Actionsでの完全自動化</li>
+                            <li>🔧 <strong>カスタマイズ重視：</strong>独自のワークフロー構築</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, rgba(149, 117, 205, 0.1) 0%, rgba(156, 39, 176, 0.1) 100%); border: 2px solid #9C27B0; border-radius: 10px; padding: 20px; margin: 20px 0;">
+                    <h4>🎯 最終的な選択指針</h4>
+                    <p><strong>簡単さ重視 → GUI版</strong>：とりあえず作品を作ってみたい、プログラミングは苦手</p>
+                    <p><strong>効率・自動化重視 → CLI版</strong>：大量制作、細かい制御、作業の自動化が必要</p>
+                    <p><strong>併用がベスト</strong>：GUI版で試作・学習し、慣れてきたらCLI版で効率化する段階的アプローチがおすすめ</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
